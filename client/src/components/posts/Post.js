@@ -4,13 +4,17 @@ import React, { useContext } from 'react';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import PropTypes from 'prop-types';
 
+import { loadCSS } from 'fg-loadcss';
+
 import { makeStyles, createMuiTheme } from '@material-ui/core/styles';
 import { ThemeProvider } from '@material-ui/styles';
 import Card from '@material-ui/core/Card';
 import Badge from '@material-ui/core/Badge';
 import Chip from '@material-ui/core/Chip';
 import Button from '@material-ui/core/Button';
+import CardHeader from '@material-ui/core/CardHeader';
 import CardContent from '@material-ui/core/CardContent';
+import CardActions from '@material-ui/core/CardActions';
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever';
 import Typography from '@material-ui/core/Typography';
 import Dialog from '@material-ui/core/Dialog';
@@ -23,25 +27,105 @@ import CommentIcon from '@material-ui/icons/Comment';
 import AuthContext from '../../context/auth/authContext';
 import PostContext from '../../context/post/postContext';
 import CommentContext from '../../context/comment/commentContext';
+import FavoriteIcon from '@material-ui/icons/Favorite';
+import IconButton from '@material-ui/core/IconButton';
+import { Icon } from '@material-ui/core';
 
-const useStyles = makeStyles({
+// Color theme for page
+const theme = createMuiTheme({
+  palette: {
+    primary: {
+      main: '#ED8121'
+    },    
+    secondary: {
+      main: '#56635B'
+    }
+  }
+});
+
+const styles = {
   card: {
-    display: 'flex',
-    width: '100%',
-    color: '#ED8121',
-    backgroundColor: '#151D26',
-    border: '1px solid #ED8121',
-    '& .MuiTypography-body1': {
-      display: 'inline',
+    backgroundColor: '#1B1B1B',
+    borderBottom: '1px solid #ED8121',    
+    borderRadius: '0px',
+    '& .MuiCardHeader-root': {
+      padding: '10px 10px 0px 10px',      
     },
-    '& p': {
-      marginLeft: '20px',
-      color: 'white',
+    '& .MuiCardHeader-content': {
+      display: 'flex',
+      marginBottom: '0px',
+      '& .MuiTypography-h5': {
+        color: '#ED8121',
+        fontWeight: 'bold',
+        fontSize: '16px',
+        lineHeight: '24px',
+        padding: '3px 10px 3px 10px',
+        border: '1px solid',       
+        borderRadius: '10px'
+      },
+      '& .MuiTypography-body1': {
+        color: '#C3C3EE',
+        marginLeft: 'auto',
+        fontSize: '14px'
+      }
+    },
+    '& .MuiCardContent-root': {
+      padding: '5px 10px 5px 10px',
+      '& .MuiTypography-colorTextSecondary': {
+        color: '#E0E0E0'
+      }
+    },
+    '& .MuiCardActions-root': {
+      padding: '0px 10px 0px 10px',
+      '& path': {
+        color: '#C3C3EE'
+      },
+      '& .material-icons': {
+        color: '#C3C3EE'
+      }
+    },
+  },
+  card2: {
+    backgroundColor: '#492A42',
+    borderBottom: '1px solid #ED8121', 
+    borderRadius: '0px',
+    '& .MuiCardHeader-content': {
+      display: 'flex',
+      marginBottom: '0px',
+      '& .MuiTypography-h5': {
+        color: '#ED8121',
+        fontWeight: 'bold',
+        fontSize: '16px',
+        lineHeight: '24px',
+        padding: '3px 10px 3px 10px',
+        border: '1px solid',       
+        borderRadius: '10px'
+      },
+      '& .MuiTypography-body1': {
+        color: '#C3C3EE',
+        marginLeft: 'auto',
+        fontSize: '14px'
+      }
+    },
+    '& .MuiCardContent-root': {
+      padding: '5px 10px 5px 10px',
+      '& .MuiTypography-colorTextSecondary': {
+        color: '#E0E0E0'
+      }
+    },
+    '& .MuiCardActions-root': {
+      padding: '0px 10px 0px 10px',
+      '& path': {
+        color: '#C3C3EE'
+      },
+      '& .material-icons': {
+        color: '#C3C3EE'
+      }
     },
   },
   deleteButton: {
-    cursor: 'pointer',
-    float: 'right',
+    marginLeft: 'auto',
+    color: '#b10000'
   },
   cardWidth: {
     width: '100%',
@@ -66,21 +150,19 @@ const useStyles = makeStyles({
     marginRight: '10px',
     cursor: 'pointer',
   },
-});
+};
 
-// Color theme for page
-const theme = createMuiTheme({
-  palette: {
-    primary: {
-      main: '#ED8121',
-    },
-    secondary: {
-      main: '#b09fa5',
-    },
-  },
-});
+const useStyles = makeStyles(styles);
 
 const Post = ({ post }) => {
+
+  React.useEffect(() => {
+    loadCSS(
+      'https://use.fontawesome.com/releases/v5.11.2/css/all.css',
+      document.querySelector('#font-awesome-css'),
+    );
+  }, []);
+
   const authContext = useContext(AuthContext);
   const postContext = useContext(PostContext);
   const commentContext = useContext(CommentContext);
@@ -116,17 +198,31 @@ const Post = ({ post }) => {
   if (user) {
     return (
       <ThemeProvider theme={theme}>
-        <Card className={classes.card}>
+        <Card className={user.userName === post.userName ? classes.card2 : classes.card}>
+          <CardHeader title={post.userName} subheader={post.date} />          
           <CardContent className={classes.cardWidth}>
-            <Chip label={post.userName} className={user.userName === post.userName ? classes.chip2 : classes.chip} />
-            <Typography className={classes.postDisplay} component="p" onClick={() => handleComments(post)}>
+            <Typography variant="p" color="textSecondary">
               {post.content}
-            </Typography>
-            <Badge className={classes.margin} badgeContent={numComments} color="primary" onClick={() => handleComments(post)}>
-              <CommentIcon />
-            </Badge>
-            {user.userName === post.userName && <DeleteForeverIcon className={classes.deleteButton} onClick={handleClickOpen} />}
+            </Typography>                      
           </CardContent>
+          <CardActions disableSpacing>
+            <IconButton aria-label="comments">
+              <Badge className={classes.margin} badgeContent={numComments} color="primary" onClick={() => handleComments(post)}>
+                <CommentIcon />
+              </Badge>
+            </IconButton>
+            <IconButton aria-label="i'll drink to that">
+              <Icon className="fas fa-beer" color="secondary" />
+            </IconButton>
+            {
+              user.userName === post.userName &&
+              <IconButton aria-label="delete forever" 
+                className={classes.deleteButton}
+                onClick={handleClickOpen}>
+                <DeleteForeverIcon />
+              </IconButton>                          
+            }
+          </CardActions>
         </Card>
         
         <Dialog
